@@ -92,6 +92,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/aws/aws-sdk-go/service/redshift"
 	"github.com/aws/aws-sdk-go/service/resourcegroups"
+	"github.com/aws/aws-sdk-go/service/resourcegroupstaggingapi"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/route53resolver"
 	"github.com/aws/aws-sdk-go/service/sagemaker"
@@ -111,6 +112,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/wafv2"
 	"github.com/aws/aws-sdk-go/service/worklink"
 	"github.com/aws/aws-sdk-go/service/workspaces"
+	"github.com/aws/aws-sdk-go/service/xray"
 )
 
 // ServiceClientType determines the service client Go type.
@@ -292,6 +294,8 @@ func ServiceClientType(serviceName string) string {
 		funcType = reflect.TypeOf(redshift.New)
 	case "resourcegroups":
 		funcType = reflect.TypeOf(resourcegroups.New)
+	case "resourcegroupstaggingapi":
+		funcType = reflect.TypeOf(resourcegroupstaggingapi.New)
 	case "route53":
 		funcType = reflect.TypeOf(route53.New)
 	case "route53resolver":
@@ -330,6 +334,8 @@ func ServiceClientType(serviceName string) string {
 		funcType = reflect.TypeOf(worklink.New)
 	case "workspaces":
 		funcType = reflect.TypeOf(workspaces.New)
+	case "xray":
+		funcType = reflect.TypeOf(xray.New)
 	default:
 		panic(fmt.Sprintf("unrecognized ServiceClientType: %s", serviceName))
 	}
@@ -360,6 +366,8 @@ func ServiceListTagsFunction(serviceName string) string {
 		return "DescribeTags"
 	case "dynamodb":
 		return "ListTagsOfResource"
+	case "ec2":
+		return "DescribeTags"
 	case "efs":
 		return "DescribeTags"
 	case "elasticsearchservice":
@@ -398,6 +406,17 @@ func ServiceListTagsFunction(serviceName string) string {
 		return "DescribeTags"
 	default:
 		return "ListTagsForResource"
+	}
+}
+
+// ServiceListTagsInputFilterIdentifierName determines the service list tag filter identifier field.
+// This causes the implementation to use the Filters field with the Input struct.
+func ServiceListTagsInputFilterIdentifierName(serviceName string) string {
+	switch serviceName {
+	case "ec2":
+		return "resource-id"
+	default:
+		return ""
 	}
 }
 
@@ -716,6 +735,8 @@ func ServiceTagInputIdentifierField(serviceName string) string {
 		return "ResourceARN"
 	case "workspaces":
 		return "ResourceId"
+	case "xray":
+		return "ResourceARN"
 	default:
 		return "ResourceArn"
 	}
@@ -815,6 +836,17 @@ func ServiceTagType(serviceName string) string {
 		return "ResourceTag"
 	default:
 		return "Tag"
+	}
+}
+
+// ServiceTagType2 determines if the service tagging has a second tag type.
+// The two types must be equivalent.
+func ServiceTagType2(serviceName string) string {
+	switch serviceName {
+	case "ec2":
+		return "TagDescription"
+	default:
+		return ""
 	}
 }
 
